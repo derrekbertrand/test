@@ -1,0 +1,44 @@
+version: '3'
+
+networks:
+  test-network:
+    driver: bridge
+
+services:
+  rails-app:
+    build:
+      context: ./rails-app
+    container_name: rails-app
+    depends_on:
+      - redis
+      - postgres
+    env_file: .env
+    image: rails-app
+    networks:
+      - test-network
+    ports:
+      - 3000:3000
+    volumes:
+      - ./rails-app/:/rails-app
+
+  redis:
+    container_name: redis
+    image: redis:6
+    networks:
+      - test-network
+    ports:
+      - 6379:6379
+    volumes:
+      - ./tmp/redis-data/:/data
+
+  postgres:
+    container_name: postgres
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+    image: postgres:latest
+    networks:
+      - test-network
+    ports:
+      - 5432:5432
+    volumes:
+      - ./tmp/postgres-data/:/var/lib/postgresql/data/
